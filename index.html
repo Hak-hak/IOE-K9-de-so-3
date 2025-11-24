@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOE K9 SỐ: 03</title>
+    <!-- Libraries from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+      body { font-family: 'Nunito', sans-serif; }
+      
+      /* Custom Scrollbar */
+      .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      
+      /* Simple Animations */
+      @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+      .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+      
+      @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+      .animate-slide-up { animation: slideUp 0.4s ease-out forwards; }
+
+      @keyframes bounceShort { 
+        0%, 100% { transform: translateY(0); } 
+        50% { transform: translateY(-5px); } 
+      }
+      .animate-bounce-short { animation: bounceShort 1s infinite; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- 1. TYPES & ENUMS ---
+        const QuestionType = {
+            MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
+            FILL_IN_BLANK: 'FILL_IN_BLANK',
+            REARRANGE: 'REARRANGE'
+        };
+
+        const GameState = {
+            START: 'START',
+            PLAYING: 'PLAYING',
+            FINISHED: 'FINISHED'
+        };
+
+        // --- 2. CONSTANTS & DATA ---
+        const cleanUrl = (url) => {
+            if (!url) return undefined;
+            return url.trim()
+                .replace(/\s+/g, '')
+                .replace(/res\.ioe\.vnzedu/, 'res.ioe.vn/edu')
+                .replace(/res\.ioe\.vii/, 'res.ioe.vn')
+                .replace(/res\.ioe\.vm/, 'res.ioe.vn')
+                .replace(/Audio\s*mp3/i, 'Audio.mp3')
+                .replace(/ImageExam\s*(\d)/, 'ImageExam/$1')
+                .replace(/Olympic\s*ExamData/, 'OlympicExamData')
+                .replace(/EOlympic\s*ExamData/, 'EOlympic/ExamData')
+                .replace(/'/g, '')
+                .replace(/Audio-mp3/i, 'Audio.mp3');
+        };
+
+        // Full Question Data for IOE K9 No. 03
+        const QUIZ_DATA = [
+  { id: 1, type: QuestionType.FILL_IN_BLANK, questionText: "The city was covered _ _ _ _ smoke from the burns nearby.", correctAnswer: "with", explanation: "Covered with (được bao phủ bởi)." },
+  { id: 2, type: QuestionType.FILL_IN_BLANK, questionText: "You can avoid _ _ _ _ _ decay by brushing your teeth regularly.", correctAnswer: "tooth", explanation: "Tooth decay (sâu răng)." },
+  { id: 3, type: QuestionType.FILL_IN_BLANK, questionText: "Another way to reduce waste is to buy high _ _ _ _ _ _ _ products.", correctAnswer: "quality", explanation: "High quality products (sản phẩm chất lượng cao)." },
+  { id: 4, type: QuestionType.FILL_IN_BLANK, questionText: "Where are they going to see ‘Grease”? - At the _ _ _ _ _ _ Theater.", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/Thi_cac_cap/2019-2020/Quoc%20Gia/L9/nghe/1/17.mp3"), correctAnswer: "Palace", explanation: "Nghe audio: Palace Theater." },
+  { id: 5, type: QuestionType.FILL_IN_BLANK, questionText: "The lesson was _ _ _ difficult for me to understand.", correctAnswer: "too", explanation: "Cấu trúc: too ... to (quá ... đến nỗi không thể)." },
+  { id: 6, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["employment", "prospects.", "References can have", "on", "a considerable"], correctAnswer: "References can have a considerable impact on employment prospects.", explanation: "Dịch: Thư giới thiệu có thể có tác động đáng kể đến triển vọng việc làm. (Lưu ý: Câu gốc có thể thiếu từ 'impact' hoặc 'influence', nhưng cấu trúc chuẩn là vậy)." },
+  { id: 7, type: QuestionType.FILL_IN_BLANK, questionText: "A person who studies life of plants and animals IS called a bio_ _ _ _ _ _ .", correctAnswer: "logist", explanation: "Biologist (nhà sinh vật học)." },
+  { id: 8, type: QuestionType.FILL_IN_BLANK, questionText: "In a shop you can use a credit card or charge card, or you pay in c_ _ _ .", correctAnswer: "ash", explanation: "Pay in cash (trả bằng tiền mặt)." },
+  { id: 9, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["wanted to visit.", "the city", "which", "Paris is", "I've always"], correctAnswer: "Paris is the city which I've always wanted to visit.", explanation: "Dịch: Paris là thành phố mà tôi luôn muốn ghé thăm." },
+  { id: 10, type: QuestionType.MULTIPLE_CHOICE, questionText: "What are computers particularly good at? -....", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2014/4/24/635339738667725582_Audio.mp3"), options: ["Doing repetitive tasks and complex computation", "Repeating common quotations and complex problems", "Solving repetitive problems and complex equations", "Testing common errors and complex solutions"], correctAnswer: "Doing repetitive tasks and complex computation", explanation: "Nghe audio." },
+  { id: 11, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose the word(s) CLOSEST in meaning to “RAISED” in the following sentence: “He has been raised to be polite by his parents.”", options: ["grown up", "turned into", "become", "brought up"], correctAnswer: "brought up", explanation: "Raised = Brought up (nuôi dưỡng)." },
+  { id: 12, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["have died of starvation", "last year.", "in Ethiopia", "Over", "50.000 people"], correctAnswer: "Over 50.000 people have died of starvation in Ethiopia last year.", explanation: "Dịch: Hơn 50.000 người đã chết vì đói ở Ethiopia năm ngoái." },
+  { id: 13, type: QuestionType.FILL_IN_BLANK, questionText: "As a result, he had to accept that the profit on each item would be low, and make up for this by selling as many items as _ _ _ _ _ _ _ _ .", correctAnswer: "possible", explanation: "As many as possible (càng nhiều càng tốt)." },
+  { id: 14, type: QuestionType.FILL_IN_BLANK, questionText: "9th-grade pupils are studying hard _ _ preparation for the high school entrance exam.", correctAnswer: "in", explanation: "In preparation for (để chuẩn bị cho)." },
+  { id: 15, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["paranormal abilities", "This", "people who claim to have", "article is about", "such as mind-reading."], correctAnswer: "This article is about people who claim to have paranormal abilities such as mind-reading.", explanation: "Dịch: Bài báo này nói về những người tuyên bố có khả năng siêu nhiên..." },
+  { id: 16, type: QuestionType.MULTIPLE_CHOICE, questionText: "The worst... areas are the midlands and North West.", options: ["affected", "affecting", "effected", "effecting"], correctAnswer: "affected", explanation: "Affected areas (khu vực bị ảnh hưởng)." },
+  { id: 17, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["see animals in forest fire.", "after the", "a vast area", "We cannot"], correctAnswer: "We cannot see animals in a vast area after the forest fire.", explanation: "Dịch: Chúng ta không thể thấy động vật trên một diện rộng sau cháy rừng." },
+  { id: 18, type: QuestionType.FILL_IN_BLANK, questionText: "In _ _ _ _ _ _ _ _ to the challenge to be excellent, American schools have been facing novel problems.", correctAnswer: "addition", explanation: "In addition to (ngoài ra, thêm vào)." },
+  { id: 19, type: QuestionType.FILL_IN_BLANK, questionText: "You’ll soon have a loyal audience who will _ _ _ _ _ _ the word about your blog.", correctAnswer: "spread", explanation: "Spread the word (lan truyền)." },
+  { id: 20, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose the odd one out:", options: ["enhance", "worsen", "enrich", "uplift"], correctAnswer: "worsen", explanation: "'Worsen' (làm tệ đi), các từ còn lại mang nghĩa tích cực (nâng cao, làm giàu)." },
+  { id: 21, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["a hundred thousand", "earthquake.", "Almost", "people died in that"], correctAnswer: "Almost a hundred thousand people died in that earthquake.", explanation: "Dịch: Gần một trăm ngàn người chết trong trận động đất đó." },
+  { id: 22, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["the date", "He agreed with", "my suggestion that", "of meeting.", "we would change"], correctAnswer: "He agreed with my suggestion that we would change the date of meeting.", explanation: "Dịch: Anh ấy đồng ý với đề nghị đổi ngày họp của tôi." },
+  { id: 23, type: QuestionType.FILL_IN_BLANK, questionText: "Today, people in Britain tra_ _ _ _ _ _ _ _ _ _ receive a silver key on the 18th birthday to symbolise opening the door to the adult world.", correctAnswer: "ditionally", explanation: "Traditionally (theo truyền thống)." },
+  { id: 24, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["at the airport", "on time.", "we arrived", "bad traffic.", "Despite the", "very"], correctAnswer: "Despite the very bad traffic, we arrived at the airport on time.", explanation: "Dịch: Mặc dù giao thông rất tệ, chúng tôi đã đến sân bay đúng giờ." },
+  { id: 25, type: QuestionType.FILL_IN_BLANK, questionText: "_ _ _ _ _ _ _ _ _ _ _ is a kind of film, television or radio program that gives facts and information about a subject.", correctAnswer: "Documentary", explanation: "Documentary (phim tài liệu)." },
+  { id: 26, type: QuestionType.FILL_IN_BLANK, questionText: "Please tell me _ _ _ to change the channel of the TV with a remote control.", correctAnswer: "how", explanation: "Tell me how to (chỉ cho tôi cách)." },
+  { id: 27, type: QuestionType.MULTIPLE_CHOICE, questionText: "John was ... after he saw the episodes on the sufferings of the children in Africa.", options: ["moved around", "brought around", "brought down", "gone down"], correctAnswer: "brought down", explanation: "Brought down (làm buồn lòng/hạ gục tinh thần)." },
+  { id: 28, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["Many people", "for a better life.", "their rural life", "and move to the city", "give up"], correctAnswer: "Many people give up their rural life and move to the city for a better life.", explanation: "Dịch: Nhiều người từ bỏ cuộc sống nông thôn và chuyển đến thành phố..." },
+  { id: 29, type: QuestionType.MULTIPLE_CHOICE, questionText: "I don't like my next door neighbour, who often ... ill of everyone behind his back.", options: ["says", "speaks", "tells", "whispers"], correctAnswer: "speaks", explanation: "Speak ill of someone (nói xấu ai)." },
+  { id: 30, type: QuestionType.FILL_IN_BLANK, questionText: "Music can effectively _ _ _ _ _ _ one’s hopes and dreams.", correctAnswer: "uplift", explanation: "Uplift (nâng cao/khơi dậy)." },
+  { id: 31, type: QuestionType.MULTIPLE_CHOICE, questionText: "What is the woman's name?", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2016/4/8/635957336291286191-Audio.mp3"), options: ["Julie", "Jenny", "Jane", "Joe"], correctAnswer: "Julie", explanation: "Nghe audio." },
+  { id: 32, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["expenses.", "Formerly, students", "a grant towards", "received", "their living"], correctAnswer: "Formerly, students received a grant towards their living expenses.", explanation: "Dịch: Trước đây, sinh viên nhận được trợ cấp cho chi phí sinh hoạt." },
+  { id: 33, type: QuestionType.FILL_IN_BLANK, questionText: "We use a _ _ _ _ _ _ to break up the soil and plant the seeds.", correctAnswer: "plough", explanation: "Plough (cái cày)." },
+  { id: 34, type: QuestionType.FILL_IN_BLANK, questionText: "I can wait four days at the _ _ _ _ .", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2017/4/14/636277591751077660-Audio.mp3"), correctAnswer: "most", explanation: "At the most (tối đa). Nghe audio." },
+  { id: 35, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["Sometimes", "get flooded.", "before their houses", "to escape", "people have little time"], correctAnswer: "Sometimes people have little time to escape before their houses get flooded.", explanation: "Dịch: Đôi khi người dân có rất ít thời gian để chạy thoát trước khi nhà bị ngập." },
+  { id: 36, type: QuestionType.FILL_IN_BLANK, questionText: "Peter IS poor, _ _ _ he usually helps the handicapped.", correctAnswer: "but", explanation: "But (nhưng)." },
+  { id: 37, type: QuestionType.MULTIPLE_CHOICE, questionText: "We were not... the mausoleum without ticket.", options: ["to allow entering", "to allow to enter", "allowed to enter", "allowed entering"], correctAnswer: "allowed to enter", explanation: "Be allowed to V (được phép làm gì)." },
+  { id: 38, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["Thank you very much", "you sent me", "while I was", "in the hospital.", "for the flowers"], correctAnswer: "Thank you very much for the flowers you sent me while I was in the hospital.", explanation: "Dịch: Cảm ơn rất nhiều vì những bông hoa bạn đã gửi..." },
+  { id: 39, type: QuestionType.FILL_IN_BLANK, questionText: "With a population of more than 7 million in the city and 19 million in the whole _ _ _ _ _ _ _ _ _ _ _ _ region, it IS the largest city in the United States.", correctAnswer: "metropolitan", explanation: "Metropolitan region (khu vực đô thị)." },
+  { id: 40, type: QuestionType.FILL_IN_BLANK, questionText: "This _ _ _ _ has threatened the park and many of the animals in it.", correctAnswer: "fire", explanation: "Fire (đám cháy/lửa)." },
+  { id: 41, type: QuestionType.MULTIPLE_CHOICE, questionText: "During the past two days, I... ten chapters.", options: ["read", "have read", "was reading", "had read"], correctAnswer: "have read", explanation: "During the past... -> Hiện tại hoàn thành." },
+  { id: 42, type: QuestionType.MULTIPLE_CHOICE, questionText: "I don't think she can get her message ... to the students. She seems too nervous.", options: ["across", "around", "out", "over"], correctAnswer: "across", explanation: "Get across (truyền đạt/làm cho hiểu)." },
+  { id: 43, type: QuestionType.MULTIPLE_CHOICE, questionText: "Marcel performed poorly at his audition because the judges were very.... and he could not overcome how nervous they made him.", options: ["intimidating", "encouraging", "talented", "portly"], correctAnswer: "intimidating", explanation: "Intimidating (đáng sợ/gây áp lực)." },
+  { id: 44, type: QuestionType.FILL_IN_BLANK, questionText: "The film you recommended is shown _ _ 20:30 on VTV3.", correctAnswer: "at", explanation: "At + giờ." },
+  { id: 45, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["sent to me", "is from", "in Poland.", "my girl friend", "The letter"], correctAnswer: "The letter sent to me is from my girl friend in Poland.", explanation: "Dịch: Lá thư gửi cho tôi là từ bạn gái ở Ba Lan." },
+  { id: 46, type: QuestionType.FILL_IN_BLANK, questionText: "Don't let your imagination run _ _ _ _ .", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2017/4/14/636277590788106985-Audio.mp3"), correctAnswer: "wild", explanation: "Run wild (thả rông/bay bổng). Nghe audio." },
+  { id: 47, type: QuestionType.MULTIPLE_CHOICE, questionText: "What does Hoa suggest? -....", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2015/4/9/635641977069838514_Audio.mp3"), options: ["Having dinner with a hilarious person", "Having dinner at a gorgeous restaurant", "Having dinner with a famous person", "Having dinner at a famous restaurant"], correctAnswer: "Having dinner at a famous restaurant", explanation: "Nghe audio." },
+  { id: 48, type: QuestionType.FILL_IN_BLANK, questionText: "The United Kingdom located in Western Europe is made up of England, Scotland, _ _ _ _ _ and Northern Ireland.", correctAnswer: "Wales", explanation: "Wales." },
+  { id: 49, type: QuestionType.MULTIPLE_CHOICE, questionText: "Mr. Pike ... English at our school for 20 years before he retired last year.", options: ["is teaching", "was teaching", "has been teaching", "had been teaching"], correctAnswer: "had been teaching", explanation: "Quá khứ hoàn thành tiếp diễn (trước khi nghỉ hưu trong quá khứ)." },
+  { id: 50, type: QuestionType.FILL_IN_BLANK, questionText: "Those whose are easily influenced by r_ _ _ _ _ _ can be never be good friends.", correctAnswer: "umours", explanation: "Rumours (tin đồn)." },
+  { id: 51, type: QuestionType.FILL_IN_BLANK, questionText: "She went to a seaside resort because she was _ _ _ _ on water-skiing very much.", correctAnswer: "keen", explanation: "Keen on (thích)." },
+  { id: 52, type: QuestionType.MULTIPLE_CHOICE, questionText: "If the negotiations hadn't been so intense, we ... the contract tomorrow.", options: ["will be signing", "would have signed", "would be signing", "will sign"], correctAnswer: "would be signing", explanation: "Câu điều kiện hỗn hợp (loại 3 + loại 2)." },
+  { id: 53, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["midnight.", "bed before", "ever", "He hardly", "goes to"], correctAnswer: "He hardly ever goes to bed before midnight.", explanation: "Dịch: Anh ấy hiếm khi đi ngủ trước nửa đêm." },
+  { id: 54, type: QuestionType.MULTIPLE_CHOICE, questionText: "I ... the hot weather in the south.", options: ["use to", "used to", "am use to", "am used to"], correctAnswer: "am used to", explanation: "Be used to + N (quen với)." },
+  { id: 55, type: QuestionType.MULTIPLE_CHOICE, questionText: "I think she was a little bit impatient, ...?", options: ["was she", "wasn't she", "do I", "don't I"], correctAnswer: "wasn't she", explanation: "Câu hỏi đuôi (vế chính 'she was')." },
+  { id: 56, type: QuestionType.FILL_IN_BLANK, questionText: "At first, very _ _ _ people drank Coca Cola, but now it is sold in more than 160 countries.", correctAnswer: "few", explanation: "Few people (Rất ít người)." },
+  { id: 57, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["for the whole day", "and unfortunately,", "It kept raining", "to a quiet day in the countryside,", "We were looking forward", "we had to cancel the trip."], correctAnswer: "We were looking forward to a quiet day in the countryside, but unfortunately, it kept raining for the whole day and we had to cancel the trip.", explanation: "Dịch: Chúng tôi đã mong chờ một ngày yên tĩnh..." },
+  { id: 58, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["remembered to", "an email last night.", "have", "send him", "I should"], correctAnswer: "I should have remembered to send him an email last night.", explanation: "Dịch: Lẽ ra tôi nên nhớ gửi email cho anh ấy tối qua." },
+  { id: 59, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["keep practising.", "English", "Your", "if you", "will improve"], correctAnswer: "Your English will improve if you keep practising.", explanation: "Dịch: Tiếng Anh của bạn sẽ cải thiện nếu bạn tiếp tục luyện tập." },
+  { id: 60, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["good marks in exam.", "she always gets", "however", "My sister never", "does any revision;"], correctAnswer: "My sister never does any revision; however, she always gets good marks in exam.", explanation: "Dịch: Chị tôi không bao giờ ôn tập; tuy nhiên, chị ấy luôn đạt điểm cao." },
+  { id: 61, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose the word that has the underlined part pronounced differently.", options: ["tidal", "device", "mineral", "sight"], correctAnswer: "mineral", explanation: "'Mineral' (/ɪ/), các từ còn lại (/aɪ/)." },
+  { id: 62, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["was reported", "department’s Missing", "Her disappearance", "to the police", "Persons Bureau."], correctAnswer: "Her disappearance was reported to the police department’s Missing Persons Bureau.", explanation: "Dịch: Sự mất tích của cô ấy đã được báo cáo cho Cục tìm kiếm người mất tích." },
+  { id: 63, type: QuestionType.MULTIPLE_CHOICE, questionText: "Don't forget ... to the travel agent’s, will you? The plane tickets need ... .", options: ["going - to pick out", "go - picking in", "to go - picking up", "to going - to pick on"], correctAnswer: "to go - picking up", explanation: "Forget to V (quên phải làm gì), Need V-ing (cần được làm gì - bị động)." },
+  { id: 64, type: QuestionType.MULTIPLE_CHOICE, questionText: "All his plans for starting his own business fell... .", options: ["through", "in", "down", "away"], correctAnswer: "through", explanation: "Fall through (thất bại/hỏng)." },
+  { id: 65, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["and ate it", "We took", "into the garden", "on the grass.", "our lunch"], correctAnswer: "We took our lunch into the garden and ate it on the grass.", explanation: "Dịch: Chúng tôi mang bữa trưa ra vườn và ăn trên cỏ." },
+  { id: 66, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["the cinema now.", "going to", "I don't", "feel", "like"], correctAnswer: "I don't feel like going to the cinema now.", explanation: "Dịch: Tôi không hứng thú đi xem phim bây giờ." },
+  { id: 67, type: QuestionType.MULTIPLE_CHOICE, questionText: "How much does the father owe his son in allowance?", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2016/4/8/635957328060791372_Audio.mp3"), options: ["Three dollars", "Thirteen dollars", "Thirty dollars", "Thirty-one dollar"], correctAnswer: "Thirty dollars", explanation: "Nghe audio." },
+  { id: 68, type: QuestionType.FILL_IN_BLANK, questionText: "Choosing a career is one of the biggest _ _ _ _ _ _ _ _ _ we make in life.", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2017/4/14/636277593909476148_Audio.mp3"), correctAnswer: "decisions", explanation: "Decisions (Quyết định). Nghe audio." },
+  { id: 69, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["You shouldn’t have a", "is eaten.", "conversation until it", "try to"], correctAnswer: "You shouldn’t try to have a conversation until it is eaten.", explanation: "(Có vẻ câu gốc hơi lạ hoặc ngữ cảnh cụ thể, nhưng sắp xếp hợp lý nhất: You shouldn't try to have a conversation...)" },
+  { id: 70, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["followings.", "your reading of", "on one of the", "Based on one of these books, write"], correctAnswer: "Based on your reading of one of these books, write on one of the followings.", explanation: "Dịch: Dựa trên việc đọc..." },
+  { id: 71, type: QuestionType.MULTIPLE_CHOICE, questionText: "She ... timidly at him and then lowered her eyes.", options: ["looked", "stared", "glanced", "sighted"], correctAnswer: "glanced", explanation: "Glance (liếc nhìn)." },
+  { id: 72, type: QuestionType.FILL_IN_BLANK, questionText: "_ _ _ _ _ _ you know what Nam is doing, you will be very surprised.", correctAnswer: "Unless", explanation: "Unless (Trừ khi/Nếu không)." },
+  { id: 73, type: QuestionType.FILL_IN_BLANK, questionText: "We _ _ _ _ forward to seeing that film, which has been praised by several film reviewers.", correctAnswer: "look", explanation: "Look forward to (mong chờ)." },
+  { id: 74, type: QuestionType.MULTIPLE_CHOICE, questionText: "Mr. John turns the TV ... to watch the hot news.", options: ["off", "on", "up", "down"], correctAnswer: "on", explanation: "Turn on (Bật)." },
+  { id: 75, type: QuestionType.FILL_IN_BLANK, questionText: "A gust of _ _ _ _ blew my hat off.", correctAnswer: "wind", explanation: "Gust of wind (Cơn gió mạnh)." },
+  { id: 76, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["Don't forget", "about the film", "which is", "called \"Copperhead \".", "to tell me"], correctAnswer: "Don't forget to tell me about the film which is called \"Copperhead\".", explanation: "Dịch: Đừng quên kể cho tôi về bộ phim..." },
+  { id: 77, type: QuestionType.MULTIPLE_CHOICE, questionText: "... your effort and talent, we wonder if you can work full time for us.", options: ["Regarding", "In regard of", "With respect to", "On behalf of"], correctAnswer: "Regarding", explanation: "Regarding (Về vấn đề/Xét tới)." },
+  { id: 78, type: QuestionType.MULTIPLE_CHOICE, questionText: "Where did the policemen force him to go? -....", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2014/4/24/635339739341178764_Audio.mp3"), options: ["To the railway station", "To the tax station", "To the petrol station", "To the police station"], correctAnswer: "To the police station", explanation: "Nghe audio." },
+  { id: 79, type: QuestionType.MULTIPLE_CHOICE, questionText: "All the pillars of the old house were carved with ornamental designs, ’carved’ means:", options: ["written", "engraved", "painted", "decorated"], correctAnswer: "engraved", explanation: "Carved = Engraved (chạm khắc)." },
+  { id: 80, type: QuestionType.MULTIPLE_CHOICE, questionText: "This machinery will be ... by the end of the decade.", options: ["phased out", "broken down", "set out", "made off with"], correctAnswer: "phased out", explanation: "Phased out (loại bỏ dần)." },
+  { id: 81, type: QuestionType.MULTIPLE_CHOICE, questionText: "I don't see any ... in arriving early at the theater if the show doesn't start until 9 o'clock.", options: ["cause", "reason", "aim", "point"], correctAnswer: "point", explanation: "See any point (thấy có ích/lý do gì)." },
+  { id: 82, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose the odd one out:", options: ["priority", "preparation", "satisfactory", "decoration"], correctAnswer: "satisfactory", explanation: "'Satisfactory' là tính từ. Các từ còn lại là danh từ." },
+  { id: 83, type: QuestionType.MULTIPLE_CHOICE, questionText: "Fuel... can be cut down by having fewer cars on the roads.", options: ["reservation", "expense", "consuming", "consumption"], correctAnswer: "consumption", explanation: "Fuel consumption (Sự tiêu thụ nhiên liệu)." },
+  { id: 84, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["She has", "lost.", "at all, so she always gets", "no sense", "of direction"], correctAnswer: "She has no sense of direction at all, so she always gets lost.", explanation: "Dịch: Cô ấy không có phương hướng gì cả..." },
+  { id: 85, type: QuestionType.FILL_IN_BLANK, questionText: "Las Vegas, Nevada, is the most famous _ _ _ _ for gambling in the United States.", correctAnswer: "city", explanation: "City (Thành phố)." },
+  { id: 86, type: QuestionType.FILL_IN_BLANK, questionText: "In s_ _ _ _ , the report says that more money should be spent on education.", correctAnswer: "hort", explanation: "In short (Tóm lại)." },
+  { id: 87, type: QuestionType.MULTIPLE_CHOICE, questionText: "Nobody called on the phone,...?", options: ["did he", "didn't he", "did they", "didn’t they"], correctAnswer: "did they", explanation: "Nobody -> They; Câu phủ định -> Hỏi đuôi khẳng định." },
+  { id: 88, type: QuestionType.FILL_IN_BLANK, questionText: "Ba said “Why don't we stop eating chicken to avoid being infected with bird _ _ _ ?", correctAnswer: "flu", explanation: "Bird flu (Cúm gia cầm)." },
+  { id: 89, type: QuestionType.FILL_IN_BLANK, questionText: "I _ _ _ _ _ _ the train which I usually catch, and I had to travel on the next one, which was a slow train.", correctAnswer: "missed", explanation: "Missed the train (Lỡ tàu)." },
+  { id: 90, type: QuestionType.FILL_IN_BLANK, questionText: "You can stay here as _ _ _ _ as you keep the room tidy.", correctAnswer: "long", explanation: "As long as (Miễn là)." },
+  { id: 91, type: QuestionType.FILL_IN_BLANK, questionText: "We can't usually predict when a volcano _ _ _ _ _ _ _ .", imageUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2014/4/25/635340419127204041_566X320.jpg"), correctAnswer: "erupts", explanation: "Erupts (Phun trào)." },
+  { id: 92, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["give such", "sensibility has", "hurtful comments.", "Your lack of", "caused you to"], correctAnswer: "Your lack of sensibility has caused you to give such hurtful comments.", explanation: "Dịch: Sự thiếu nhạy cảm của bạn đã khiến bạn đưa ra những bình luận gây tổn thương như vậy." },
+  { id: 93, type: QuestionType.FILL_IN_BLANK, questionText: "Paper mills re_ _ _ _ _ seventy percent of the waste paper.", correctAnswer: "cycle", explanation: "Recycle (Tái chế)." },
+  { id: 94, type: QuestionType.FILL_IN_BLANK, questionText: "He promised me not to _ _ _ _ such stupid mistakes any more.", correctAnswer: "make", explanation: "Make mistakes (Mắc lỗi)." },
+  { id: 95, type: QuestionType.MULTIPLE_CHOICE, questionText: "Peter's success at college ... his family.", options: ["lulled", "delighted", "composed", "played"], correctAnswer: "delighted", explanation: "Delighted (Làm vui lòng)." },
+  { id: 96, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["repair", "so as to", "I bought", "my bicycle.", "a new screwdriver"], correctAnswer: "I bought a new screwdriver so as to repair my bicycle.", explanation: "Dịch: Tôi mua tuốc nơ vít mới để sửa xe đạp." },
+  { id: 97, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["In the first row", "the gold medals.", "will receive", "The boys", "who are sitting"], correctAnswer: "The boys who are sitting in the first row will receive the gold medals.", explanation: "Dịch: Những cậu bé ngồi hàng đầu sẽ nhận huy chương vàng." },
+  { id: 98, type: QuestionType.MULTIPLE_CHOICE, questionText: "To avoid ... , the actor hired a group of bodyguards.", options: ["attacking", "being attacked", "to be attacked", "attacked"], correctAnswer: "being attacked", explanation: "Avoid + V-ing (bị động: being V3)." },
+  { id: 99, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["the use of", "has authorized", "The university", "dictionaries", "during their language examination."], correctAnswer: "The university has authorized the use of dictionaries during their language examination.", explanation: "Dịch: Trường đại học đã cho phép sử dụng từ điển..." },
+  { id: 100, type: QuestionType.MULTIPLE_CHOICE, questionText: "Your career should focus on a field in ... you are genuinely interested.", options: ["which", "what", "that", "0"], correctAnswer: "which", explanation: "In which (Giới từ + đại từ quan hệ)." },
+  { id: 101, type: QuestionType.MULTIPLE_CHOICE, questionText: "The employee to ... you refer IS no longer works in that company.", options: ["that", "who", "him", "whom"], correctAnswer: "whom", explanation: "To whom (Giới từ + whom)." },
+  { id: 102, type: QuestionType.FILL_IN_BLANK, questionText: "After break-up, I actually got time to look at _ _ _ _ _ _ in a different way.", correctAnswer: "myself", explanation: "Look at myself (Nhìn lại bản thân)." },
+  { id: 103, type: QuestionType.MULTIPLE_CHOICE, questionText: "The building ... he lives ... is very old.", options: ["which/ in", "that/ within", "where/ in", "where/ on"], correctAnswer: "which/ in", explanation: "Which ... in (= Where)." },
+  { id: 104, type: QuestionType.FILL_IN_BLANK, questionText: "Many young people go to the cities to search for jobs as few are _ _ _ _ _ _ _ _ _ in the rural areas.", correctAnswer: "available", explanation: "Available (Có sẵn)." },
+  { id: 105, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose the word that has different stress pattern:", options: ["appeal", "cigarette", "machine", "delight"], correctAnswer: "cigarette", explanation: "'Cigarette' nhấn âm 3. Các từ còn lại nhấn âm 2." },
+  { id: 106, type: QuestionType.MULTIPLE_CHOICE, questionText: "“Why are you ... such hurry?” - “Till missing the last train.”", options: ["in", "with", "by", "on"], correctAnswer: "in", explanation: "In a hurry (Đang vội)." },
+  { id: 107, type: QuestionType.FILL_IN_BLANK, questionText: "Quite soon, the world is going to _ _ _ out of energy resources.", correctAnswer: "run", explanation: "Run out of (Cạn kiệt)." },
+  { id: 108, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose the word that has the underlined part pronounced differently.", options: ["lesson", "empty", "describe", "separate"], correctAnswer: "describe", explanation: "'Describe' (/i/), các từ còn lại (/e/)." },
+  { id: 109, type: QuestionType.FILL_IN_BLANK, questionText: "The Mekong River, according to the World Wildlife Fund, accounts _ _ _ as much as 25% of global freshwater catch.", correctAnswer: "for", explanation: "Accounts for (Chiếm/Giải thích cho)." },
+  { id: 110, type: QuestionType.FILL_IN_BLANK, questionText: "Timor Leste is one of the countries of the Association of South East Asian _ _ _ _ _ _ _ .", correctAnswer: "Nations", explanation: "ASEAN (Association of South East Asian Nations)." },
+  { id: 111, type: QuestionType.MULTIPLE_CHOICE, questionText: "Who were believed to make people ill in Ancient Greece?", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2019/4/2/636898232671602798_Audio.mp3"), options: ["Evil spirits.", "Angry gods.", "Beasts.", "Both evil spirits and angry gods."], correctAnswer: "Both evil spirits and angry gods.", explanation: "Nghe audio." },
+  { id: 112, type: QuestionType.MULTIPLE_CHOICE, questionText: "Are you quite sure you know why ...?", options: ["was he dismissed", "he was dismissing", "he was dismissed", "did he dismiss"], correctAnswer: "he was dismissed", explanation: "Câu gián tiếp (Why S + V)." },
+  { id: 113, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["The people", "waiting for", "are getting wet.", "in the rain", "the bus"], correctAnswer: "The people waiting for the bus in the rain are getting wet.", explanation: "Dịch: Những người đợi xe buýt dưới mưa đang bị ướt." },
+  { id: 114, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["Exhaust fume", "is one of the reasons", "of increased pollution", "in urban areas.", "from vehicles"], correctAnswer: "Exhaust fume from vehicles is one of the reasons of increased pollution in urban areas.", explanation: "Dịch: Khói thải từ xe cộ là một trong những nguyên nhân..." },
+  { id: 115, type: QuestionType.FILL_IN_BLANK, questionText: "In spite of his bad cough, he has no intention to _ _ _ _ up smoking.", correctAnswer: "give", explanation: "Give up (Từ bỏ)." },
+  { id: 116, type: QuestionType.FILL_IN_BLANK, questionText: "I’ve never met anyone so _ _ _ _ _ _ _ _ as him.", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2014/4/24/635339746504867347_Audio.mp3"), correctAnswer: "arrogant", explanation: "Arrogant (Kiêu ngạo). Nghe audio." },
+  { id: 117, type: QuestionType.MULTIPLE_CHOICE, questionText: "Warmth, moisture, and oxygen are three necessary requirements ... most seedlings.", options: ["for cultivating", "for cultivate", "as cultivating", "can cultivate"], correctAnswer: "for cultivating", explanation: "Requirement for + V-ing." },
+  { id: 118, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose the word whose underlined part is pronounced differently from others:", options: ["exchange", "galaxy", "exhibit", "taxation"], correctAnswer: "galaxy", explanation: "'Galaxy' (/æ/), các từ còn lại (/ig/ hoặc /ks/ - Exhibit /ig/, Exchange /iks/, Taxation /ks/)." },
+  { id: 119, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["was so unexpected", "to say.", "didn't know what", "The remark", "that she"], correctAnswer: "The remark was so unexpected that she didn't know what to say.", explanation: "Dịch: Lời nhận xét quá bất ngờ khiến cô ấy không biết nói gì." },
+  { id: 120, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose the word whose primary stress is placed different from that of the others:", options: ["compulsory", "achievement", "business", "material"], correctAnswer: "business", explanation: "'Business' nhấn âm 1. Các từ còn lại nhấn âm 2." },
+  { id: 121, type: QuestionType.MULTIPLE_CHOICE, questionText: "Listen and tick:", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2013/12/3/635216781674991005_Audio.mp3"), options: ["You cannot get on the net without buying an ISP", "You cannot get on the net without connecting to an ISP.", "You can get on the net with or without connecting to an ISP.", "You cannot log in your Web site without connecting to an ISP."], correctAnswer: "You cannot get on the net without connecting to an ISP.", explanation: "Nghe audio." },
+  { id: 122, type: QuestionType.FILL_IN_BLANK, questionText: "Newspapers and magazines write about water pollution, _ _ _ pollution and land pollution.", correctAnswer: "air", explanation: "Air pollution (ô nhiễm không khí)." },
+  { id: 123, type: QuestionType.FILL_IN_BLANK, questionText: "However poor I was, I would not _ _ _ _ to stealing.", correctAnswer: "take", explanation: "Take to stealing (Bắt đầu thói quen ăn trộm)." },
+  { id: 124, type: QuestionType.FILL_IN_BLANK, questionText: "She said that she had worked t_ _ _ _ for one year.", correctAnswer: "here", explanation: "There/Here (Ở đó/đây)." },
+  { id: 125, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["who destroyed", "Le Van Tam,", "Vietnamese hero,", "was a little", "the Ammunition Depot with petrol"], correctAnswer: "Le Van Tam, who destroyed the Ammunition Depot with petrol, was a little Vietnamese hero.", explanation: "Dịch: Lê Văn Tám..." },
+  { id: 126, type: QuestionType.MULTIPLE_CHOICE, questionText: "What does David always choose when renting a video?", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2015/1/9/635563967281463451_Audio.mp3"), options: ["a comedy", "a horror movie", "a drama series", "a detective movie"], correctAnswer: "a horror movie", explanation: "Nghe audio." },
+  { id: 127, type: QuestionType.FILL_IN_BLANK, questionText: "A red car has just _ _ _ _ _ _ up in front of our house. Are we expecting anyone?", correctAnswer: "pulled", explanation: "Pulled up (Đỗ xe)." },
+  { id: 128, type: QuestionType.FILL_IN_BLANK, questionText: "After swimming a lot, I often get _ _ _ _ _ in one leg.", correctAnswer: "cramp", explanation: "Cramp (Chuột rút)." },
+  { id: 129, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["overnight.", "saying that", "English cannot", "be learnt", "It goes without"], correctAnswer: "It goes without saying that English cannot be learnt overnight.", explanation: "Dịch: Không cần phải nói cũng biết tiếng Anh không thể học trong một sớm một chiều." },
+  { id: 130, type: QuestionType.MULTIPLE_CHOICE, questionText: "They don’t let me take a taxi. They insist... in their car.", options: ["me to come", "on my coming", "on come", "for me to come"], correctAnswer: "on my coming", explanation: "Insist on + V-ing (hoặc sở hữu + V-ing)." },
+  { id: 131, type: QuestionType.MULTIPLE_CHOICE, questionText: "... my shyness, they refused to give me the job as a receptionist.", options: ["Despite", "As for", "Due to", "Instead of"], correctAnswer: "Due to", explanation: "Due to (Bởi vì/Do) + Noun." },
+  { id: 132, type: QuestionType.FILL_IN_BLANK, questionText: "Some volcanoes are always erupting. They are called _ _ _ _ _ _ volcanoes.", correctAnswer: "active", explanation: "Active volcanoes (Núi lửa đang hoạt động)." },
+  { id: 133, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose the word that has different stress pattern:", options: ["capture", "crazy", "creature", "device"], correctAnswer: "device", explanation: "'Device' nhấn âm 2. Các từ còn lại nhấn âm 1." },
+  { id: 134, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["is very intelligent.", "Tom", "closest friends,", "is one of my", "who"], correctAnswer: "Tom, who is one of my closest friends, is very intelligent.", explanation: "Dịch: Tom, một trong những người bạn thân nhất của tôi..." },
+  { id: 135, type: QuestionType.FILL_IN_BLANK, questionText: "A turtle differs _ _ _ _ all other reptiles in that its body is encased in a protective shell of its own.", correctAnswer: "from", explanation: "Differs from (Khác với)." },
+  { id: 136, type: QuestionType.MULTIPLE_CHOICE, questionText: "You had your house repaired last month, ...?", options: ["hadn't you", "didn't you", "isn't it", "hadn't it"], correctAnswer: "didn't you", explanation: "Had (động từ thường thì quá khứ) -> Didn't you." },
+  { id: 137, type: QuestionType.FILL_IN_BLANK, questionText: "Despite having taken a taxi, Bill still arrived late for the _ _ _ _ _ _ _ .", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2014/4/24/635339744280303440_Audio.mp3"), correctAnswer: "concert", explanation: "Concert (Buổi hòa nhạc). Nghe audio." },
+  { id: 138, type: QuestionType.FILL_IN_BLANK, questionText: "Man may damage their land with too many _ _ _ _ _ _ _ _ _ _ _ and pesticides.", correctAnswer: "fertilizers", explanation: "Fertilizers (Phân bón)." },
+  { id: 139, type: QuestionType.MULTIPLE_CHOICE, questionText: "What will tourists take in their tour? -....", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2013/12/3/635216775229839685_Audio.mp3"), options: ["A boat trip along the sea", "A boat trip along rivers", "A boat trip along canals", "A boat trip around the island"], correctAnswer: "A boat trip along canals", explanation: "Nghe audio." },
+  { id: 140, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["In the future", "all the work", "for human", "will do", "machines"], correctAnswer: "In the future machines will do all the work for human.", explanation: "Dịch: Trong tương lai máy móc sẽ làm mọi việc cho con người." },
+  { id: 141, type: QuestionType.MULTIPLE_CHOICE, questionText: "If he worked more slowly, he ... so many mistakes.", options: ["will not make", "didn't make", "would not make", "wasn't making"], correctAnswer: "would not make", explanation: "Câu điều kiện loại 2." },
+  { id: 142, type: QuestionType.MULTIPLE_CHOICE, questionText: "Northampton High School is...: students come from 24 different countries and speak 15 languages.", options: ["diverse", "uniform", "local", "universal"], correctAnswer: "diverse", explanation: "Diverse (Đa dạng)." },
+  { id: 143, type: QuestionType.FILL_IN_BLANK, questionText: "In _ _ _ _ _ of his age, he works as hard as he used to.", correctAnswer: "spite", explanation: "In spite of (Mặc dù)." },
+  { id: 144, type: QuestionType.FILL_IN_BLANK, questionText: "My husband pumps water into the paddy fields while I do the rice t_ _ _ _ _ _ _ _ _ _ _ _ .", correctAnswer: "transplanting", explanation: "Transplanting (Cấy lúa)." },
+  { id: 145, type: QuestionType.MULTIPLE_CHOICE, questionText: "Careless driving also accounts ... the increasing number of traffic accidents.", options: ["on", "into", "for", "with"], correctAnswer: "for", explanation: "Account for (Chiếm/Gây ra)." },
+  { id: 146, type: QuestionType.MULTIPLE_CHOICE, questionText: "He wanted to know ... there.", options: ["how much time I had been", "how long I had been", "how many time had I been", "how long had I been"], correctAnswer: "how long I had been", explanation: "Câu gián tiếp (How long S + V)." },
+  { id: 147, type: QuestionType.FILL_IN_BLANK, questionText: "The old man was killed _ _ _ _ a gun.", correctAnswer: "with", explanation: "With a gun (Bằng một khẩu súng)." },
+  { id: 148, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["this summer.", "are going to", "the seaside", "and girls", "The boys"], correctAnswer: "The boys and girls are going to the seaside this summer.", explanation: "Dịch: Các chàng trai và cô gái sẽ đi biển mùa hè này." },
+  { id: 149, type: QuestionType.FILL_IN_BLANK, questionText: "In seven days, we can get a new newspaper from a _ _ _ _ _ _ _ _ newspaper!", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2019/4/2/636898240887857145_Audio.mp3"), correctAnswer: "recycled", explanation: "Recycled (Tái chế). Nghe audio." },
+  { id: 150, type: QuestionType.FILL_IN_BLANK, questionText: "How did you pay for this _ _ _ _ _ _ ?", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2016/4/8/635956753617000254_Audio.mp3"), correctAnswer: "carpet", explanation: "Carpet (Thảm). Nghe audio." },
+  { id: 151, type: QuestionType.FILL_IN_BLANK, questionText: "They w_ _ _ _ _ _ _ _ because they didn't want to be noticed.", correctAnswer: "hispered", explanation: "Whispered (Thì thầm)." },
+  { id: 152, type: QuestionType.MULTIPLE_CHOICE, questionText: "The Chinese scientists,... prediction made by observing animal behavior, saved millions of people from the earthquake in 1976.", options: ["who", "whose", "whom", "that"], correctAnswer: "whose", explanation: "Whose (Của họ - sở hữu)." },
+  { id: 153, type: QuestionType.FILL_IN_BLANK, questionText: "This cake is made _ _ _ _ all natural ingredients.", correctAnswer: "from", explanation: "Made from (Làm từ)." },
+  { id: 154, type: QuestionType.FILL_IN_BLANK, questionText: "Man and most animals need a _ _ _ _ _ _ _ _ supply of water to live.", correctAnswer: "constant", explanation: "Constant supply (Nguồn cung cấp liên tục)." },
+  { id: 155, type: QuestionType.MULTIPLE_CHOICE, questionText: "“Why was Bob so angry with his wife?\" - Because of... late”.", options: ["her to be", "her being", "she is", "she be"], correctAnswer: "her being", explanation: "Because of + V-ing (hoặc sở hữu + V-ing)." },
+  { id: 156, type: QuestionType.FILL_IN_BLANK, questionText: "The _ _ _ _ _ _ _ _ _ was an excellent piece of journalism.", correctAnswer: "reportage", explanation: "Reportage (Bài phóng sự) hoặc Interview." },
+  { id: 157, type: QuestionType.FILL_IN_BLANK, questionText: "You haven’t _ _ _ _ my rubber, have you Paul?", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2015/4/9/635641981634884532_Audio.mp3"), correctAnswer: "seen", explanation: "Seen (Thấy). Nghe audio." },
+  { id: 158, type: QuestionType.MULTIPLE_CHOICE, questionText: "Most of... archaeologists know about prehistoric cultures is based on studies of material remains.", options: ["these", "what", "which", "then"], correctAnswer: "what", explanation: "What (Những gì)." },
+  { id: 159, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose one word that has opposite meaning with the word \"dead\".", options: ["lively", "lovely", "alive", "alone"], correctAnswer: "alive", explanation: "Dead (chết) >< Alive (sống)." },
+  { id: 160, type: QuestionType.FILL_IN_BLANK, questionText: "I saw her walk in the park w_ _ _ her dog.", correctAnswer: "ith", explanation: "With (Với)." },
+  { id: 161, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["to the", "to possible delay.", "Due", "bad weather", "some international flight will be subject"], correctAnswer: "Due to the bad weather some international flight will be subject to possible delay.", explanation: "Dịch: Do thời tiết xấu..." },
+  { id: 162, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["recycling.", "are", "collected Waste paper and bottles", "for"], correctAnswer: "Waste paper and bottles are collected for recycling.", explanation: "Dịch: Giấy vụn và chai lọ được thu gom để tái chế." },
+  { id: 163, type: QuestionType.MULTIPLE_CHOICE, questionText: "We think that Mother's Day should be celebrated ....", options: ["nationhood", "nationwide", "nationality", "nation"], correctAnswer: "nationwide", explanation: "Nationwide (Toàn quốc)." },
+  { id: 164, type: QuestionType.FILL_IN_BLANK, questionText: "A lorry which had broken down was _ _ _ _ _ _ _ _ the road.", correctAnswer: "blocking", explanation: "Blocking (Chặn)." },
+  { id: 165, type: QuestionType.MULTIPLE_CHOICE, questionText: "Which sentence is correct?", imageUrl: cleanUrl("https://res.ioe.vn/edu/E01ympic/ExamData/Thi_cac_cap/2019-2020/Quoc%20Gia/L9/Anh/56.jpg"), options: ["Jack doesn't need to bling anything to the meeting.", "Jack and Will are both going to the meeting in the evening.", "Will wanted to remind Jack about the time for the meeting.", "The computer is available in the meeting room."], correctAnswer: "Will wanted to remind Jack about the time for the meeting.", explanation: "Dựa vào nội dung ảnh (thường là email/note nhắc nhở)." },
+  { id: 166, type: QuestionType.MULTIPLE_CHOICE, questionText: "The ceiling fans were on, but unfortunately they only ... the hot, humid air.", options: ["stirred up", "poured through", "turned into", "cut back"], correctAnswer: "stirred up", explanation: "Stir up (khuấy động/làm xáo trộn không khí nóng)." },
+  { id: 167, type: QuestionType.MULTIPLE_CHOICE, questionText: "When I arrived, there ... no one at the party.", options: ["had been", "was", "is", "must be"], correctAnswer: "was", explanation: "Was (Đã không có ai)." },
+  { id: 168, type: QuestionType.MULTIPLE_CHOICE, questionText: "How did Peter feel about the news? -....", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExanr/2014/4/24/635339740321640487_Audio.mp3"), options: ["Excited", "Disappointed", "Indifferent", "Patient"], correctAnswer: "Disappointed", explanation: "Nghe audio." },
+  { id: 169, type: QuestionType.FILL_IN_BLANK, questionText: "For most households, lighting _ _ _ _ _ _ _ _ for 10 percent to 15 percent of the electricity bill.", correctAnswer: "accounts", explanation: "Accounts for (Chiếm)." },
+  { id: 170, type: QuestionType.MULTIPLE_CHOICE, questionText: "The new speed restrictions were a...debated issue.", options: ["heavily", "hotly", "deeply", "profoundly"], correctAnswer: "hotly", explanation: "Hotly debated (Tranh luận sôi nổi)." },
+  { id: 171, type: QuestionType.FILL_IN_BLANK, questionText: "His answer was so confused that I could hardly make any _ _ _ _ _ of it at all.", correctAnswer: "sense", explanation: "Make sense of (Hiểu)." },
+  { id: 172, type: QuestionType.FILL_IN_BLANK, questionText: "More land is used for farms, houses or industry, and there are fewer open spaces _ _ _ _ there once were.", correctAnswer: "than", explanation: "Fewer ... than (Ít hơn ... so với)." },
+  { id: 173, type: QuestionType.FILL_IN_BLANK, questionText: "The teacher has asked Mai to write an _ _ _ _ _ on the Thames.", audioUrl: cleanUrl("https://res.ioe.vn/edu/EOlympic/ExamData/ImageExam/2014/4/24/635339752205439360_Audio.mp3"), correctAnswer: "essay", explanation: "Essay (Bài luận). Nghe audio." },
+  { id: 174, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["for car-pool vehicles.", "and traffic lanes are reserved", "Some US cities", "people to contact each other.", "have a public service that helps such"], correctAnswer: "Some US cities have a public service that helps such people to contact each other, and traffic lanes are reserved for car-pool vehicles.", explanation: "Dịch: Một số thành phố ở Mỹ có dịch vụ công cộng giúp..." },
+  { id: 175, type: QuestionType.FILL_IN_BLANK, questionText: "A dilemma is a situation in which a _ _ _ _ _ _ _ _ _ choice has to be made between two, sometimes unpleasant, options.", correctAnswer: "difficult", explanation: "Difficult choice (Lựa chọn khó khăn)." },
+  { id: 176, type: QuestionType.MULTIPLE_CHOICE, questionText: "They congratulated me ... the exams with high marks.", options: ["passed", "having passed", "topass", "on passing"], correctAnswer: "on passing", explanation: "Congratulate on + V-ing." },
+  { id: 177, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["who lose", "to spend time", "with people", "I don't like", "their tempers easily."], correctAnswer: "I don't like to spend time with people who lose their tempers easily.", explanation: "Dịch: Tôi không thích dành thời gian với những người dễ nổi nóng." },
+  { id: 178, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["artistic", "The paintings provide evidence of", "develop-ment.", "his"], correctAnswer: "The paintings provide evidence of his artistic develop-ment.", explanation: "Dịch: Những bức tranh cung cấp bằng chứng về sự phát triển nghệ thuật của anh ấy." },
+  { id: 179, type: QuestionType.FILL_IN_BLANK, questionText: "If you study at the Brighton Language Center, you can live in a _ _ _ _ _ _ _ _ _ on campus.", correctAnswer: "dormitory", explanation: "Dormitory (Ký túc xá)." },
+  { id: 180, type: QuestionType.FILL_IN_BLANK, questionText: "Without _ _ _ _ _ _ _ _ _ _ _ _ , natural resources will be used up within a hundred years.", correctAnswer: "conservation", explanation: "Conservation (Sự bảo tồn)." },
+  { id: 181, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["Environmental pollution", "deadly effect", "and ecosystem.", "can have a", "on humans"], correctAnswer: "Environmental pollution can have a deadly effect on humans and ecosystem.", explanation: "Dịch: Ô nhiễm môi trường có thể gây tác động chết người..." },
+  { id: 182, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["had hurried up, you", "late now.", "If you", "wouldn't be"], correctAnswer: "If you had hurried up, you wouldn't be late now.", explanation: "Dịch: Nếu bạn nhanh lên thì giờ đã không muộn. (Câu điều kiện hỗn hợp)." },
+  { id: 183, type: QuestionType.MULTIPLE_CHOICE, questionText: "Choose the word that has the underlined part pronounced differently.", options: ["considerable", "congratulate", "decorate", "profitable"], correctAnswer: "decorate", explanation: "'Decorate' (/eɪ/), các từ còn lại (/ə/ hoặc /i/)." },
+  { id: 184, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["me", "speak Spanish.", "if", "She asked", "I could"], correctAnswer: "She asked me if I could speak Spanish.", explanation: "Dịch: Cô ấy hỏi tôi liệu tôi có thể nói tiếng Tây Ban Nha không." },
+  { id: 185, type: QuestionType.FILL_IN_BLANK, questionText: "They have been married _ _ _ ten years but they have no children.", correctAnswer: "for", explanation: "For + khoảng thời gian." },
+  { id: 186, type: QuestionType.FILL_IN_BLANK, questionText: "The car is old but reliable; so far it hasn't let me _ _ _ _ .", correctAnswer: "down", explanation: "Let me down (Làm tôi thất vọng/Hỏng hóc)." },
+  { id: 187, type: QuestionType.MULTIPLE_CHOICE, questionText: "Have you ever read any articles, stories or reports ... UFOs?", options: ["in", "on", "for", "about"], correctAnswer: "about", explanation: "About (Về)." },
+  { id: 188, type: QuestionType.FILL_IN_BLANK, questionText: "We have no alternative _ _ _ to pay them the whole amount before the end of the month.", correctAnswer: "but", explanation: "No alternative but (Không còn cách nào khác ngoài)." },
+  { id: 189, type: QuestionType.FILL_IN_BLANK, questionText: "She repeated the instructions slowly in _ _ _ _ _ that he should understand.", correctAnswer: "order", explanation: "In order that (Để)." },
+  { id: 190, type: QuestionType.FILL_IN_BLANK, questionText: "Football is the most enjoyable game in many countries. Its popularity is greater _ _ _ _ any other games.", correctAnswer: "than", explanation: "Greater than (Lớn hơn)." },
+  { id: 191, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["the plants warm,", "is for", "This heater", "in winter.", "keeping"], correctAnswer: "This heater is for keeping the plants warm in winter.", explanation: "Dịch: Máy sưởi này dùng để giữ ấm cho cây vào mùa đông." },
+  { id: 192, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["Scientists have", "on some planets", "discovered water", "which are far away.", "from the earth."], correctAnswer: "Scientists have discovered water on some planets which are far away from the earth.", explanation: "Dịch: Các nhà khoa học đã phát hiện ra nước trên một số hành tinh..." },
+  { id: 193, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["project was completed", "in ten years at", "of about $387 million.", "a cost", "The monumental"], correctAnswer: "The monumental project was completed in ten years at a cost of about $387 million.", explanation: "Dịch: Dự án hoành tráng đã hoàn thành trong 10 năm với chi phí..." },
+  { id: 194, type: QuestionType.MULTIPLE_CHOICE, questionText: "The plan ... for a long time was eventually finalized yesterday.", options: ["having been developed", "being developed", "developing", "to be developed"], correctAnswer: "having been developed", explanation: "Rút gọn mệnh đề quan hệ (dạng bị động hoàn thành)." },
+  { id: 195, type: QuestionType.MULTIPLE_CHOICE, questionText: "My colleagues are very pleasant, but the manager was a little ...", options: ["unfriendly", "friendly", "friendship", "friendless"], correctAnswer: "unfriendly", explanation: "Unfriendly (Không thân thiện - trái nghĩa với pleasant)." },
+  { id: 196, type: QuestionType.FILL_IN_BLANK, questionText: "The new power station produces vast amounts of _ _ _ _ _ _ _ _ _ _ _ .", correctAnswer: "electricity", explanation: "Electricity (Điện)." },
+  { id: 197, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["the best ways", "One of", "and property is to", "to protect family", "get flood insurance."], correctAnswer: "One of the best ways to protect family and property is to get flood insurance.", explanation: "Dịch: Một trong những cách tốt nhất để bảo vệ gia đình..." },
+  { id: 198, type: QuestionType.REARRANGE, questionText: "Sắp xếp câu:", rearrangeParts: ["accessible than ever before.", "are more", "Medical", "easily", "facilities"], correctAnswer: "Medical facilities are more easily accessible than ever before.", explanation: "Dịch: Các cơ sở y tế dễ dàng tiếp cận hơn bao giờ hết." },
+  { id: 199, type: QuestionType.FILL_IN_BLANK, questionText: "On Easter Sunday, families often come together for a dinner of ham or _ _ _ _ with fresh spring vegetables.", correctAnswer: "lamb", explanation: "Lamb (Thịt cừu)." },
+  { id: 200, type: QuestionType.MULTIPLE_CHOICE, questionText: "The ...Christmas dinner consists of roast turkey with potatoes and vegetables.", options: ["tradition", "traditional", "traditionally", "traditionalize"], correctAnswer: "traditional", explanation: "Traditional (Truyền thống - tính từ)." }
+];
+
+        // --- COMPONENTS ---
+        const Button = ({ children, variant = 'primary', size = 'md', className = '', ...props }) => {
+             const baseStyles = "inline-flex items-center justify-center font-bold transition-all duration-200 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transform active:scale-95";
+             const variants = {
+                primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 focus:ring-blue-500",
+                secondary: "bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/30 focus:ring-emerald-500",
+                danger: "bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/30 focus:ring-rose-500",
+                outline: "bg-white border-2 border-slate-300 text-slate-600 hover:border-blue-500 hover:text-blue-600"
+             };
+             const sizes = { sm: "px-4 py-1.5 text-sm", md: "px-6 py-3 text-base", lg: "px-8 py-4 text-lg" };
+             return <button className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`} {...props}>{children}</button>;
+        };
+
+        const StartScreen = ({ onStart }) => {
+            const [name, setName] = useState('');
+            const handleSubmit = (e) => { e.preventDefault(); if (name.trim()) onStart(name.trim()); };
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center animate-slide-up">
+                        <div className="mb-8">
+                            <h1 className="text-3xl font-extrabold text-slate-800 mb-2">IOE K9 SỐ: 03</h1>
+                            <p className="text-slate-500">Luyện thi tiếng Anh IOE cùng AI Master</p>
+                        </div>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="text-left"><label className="block text-sm font-medium text-slate-700 mb-2">Tên của bạn</label><input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nhập tên..." className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" required /></div>
+                            <Button type="submit" className="w-full" size="lg" disabled={!name.trim()}>Bắt đầu chơi</Button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        const AudioPlayer = ({ src }) => {
+            const audioRef = useRef(null);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const togglePlay = () => { if (audioRef.current) { if (isPlaying) audioRef.current.pause(); else audioRef.current.play(); setIsPlaying(!isPlaying); } };
+            return (
+                <div className="flex items-center gap-3 bg-slate-100 p-3 rounded-lg border border-slate-200">
+                    <button type="button" onClick={togglePlay} className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">{isPlaying ? '❚❚' : '▶'}</button>
+                    <span className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Nghe câu hỏi</span>
+                    <audio ref={audioRef} src={src} onEnded={() => setIsPlaying(false)} className="hidden" />
+                </div>
+            );
+        };
+
+        const QuestionCard = ({ question, onAnswer, isAnswered, userAnswer }) => {
+            const [inputVal, setInputVal] = useState('');
+            const [selectedParts, setSelectedParts] = useState([]);
+            const [showHint, setShowHint] = useState(false);
+            const [hintText, setHintText] = useState('');
+
+            useEffect(() => { 
+                setInputVal(''); 
+                setSelectedParts([]); 
+                setShowHint(false);
+                setHintText('');
+            }, [question.id]);
+
+            const normalize = (str) => str ? str.replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ').trim().toLowerCase() : "";
+            const isCorrect = () => userAnswer && normalize(userAnswer) === normalize(question.correctAnswer);
+
+            const handleMCSelect = (opt) => !isAnswered && onAnswer(opt);
+            const handleInputSubmit = (e) => { e.preventDefault(); if (!isAnswered && inputVal.trim()) onAnswer(inputVal.trim()); };
+            const handlePartClick = (part) => { if (!isAnswered) setSelectedParts(prev => prev.includes(part) ? prev.filter(p => p !== part) : [...prev, part]); };
+            const handleRearrangeSubmit = () => !isAnswered && selectedParts.length > 0 && onAnswer(selectedParts.join(' '));
+
+            const generateHint = () => {
+                if (hintText) return;
+                let text = '';
+                if (question.type === QuestionType.MULTIPLE_CHOICE) {
+                    const wrongOptions = question.options?.filter(opt => opt !== question.correctAnswer) || [];
+                    if (wrongOptions.length > 0) {
+                         const randomWrong = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+                         text = `Gợi ý 50/50: Loại bỏ đáp án "${randomWrong}".`;
+                    }
+                } else if (question.type === QuestionType.FILL_IN_BLANK) {
+                     const answer = question.correctAnswer.trim();
+                     text = `Từ này có ${answer.length} chữ cái. Bắt đầu bằng "${answer.charAt(0).toUpperCase()}...".`;
+                } else {
+                     const words = question.correctAnswer.split(' ');
+                     const hintPhrase = words.slice(0, Math.max(1, Math.floor(words.length/2))).join(' ');
+                     text = `Gợi ý: Câu bắt đầu bằng "${hintPhrase}..."`;
+                }
+                setHintText(text);
+            };
+
+            return (
+                <div className="w-full max-w-3xl mx-auto mb-8 animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+                        <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-extrabold uppercase">{question.type.replace(/_/g, ' ')}</span>
+                                {!isAnswered && (
+                                    <button onClick={() => { generateHint(); setShowHint(!showHint); }} className="px-3 py-1 text-xs font-bold border rounded-full bg-yellow-50 text-yellow-600 border-yellow-200 hover:bg-yellow-100">
+                                        {showHint ? 'Ẩn Gợi ý' : 'Gợi ý'}
+                                    </button>
+                                )}
+                            </div>
+                            <span className="text-xs font-bold text-slate-300">ID: {question.id}</span>
+                        </div>
+                        <div className="p-6 sm:p-10">
+                            <div className="mb-6 space-y-4">
+                                {question.imageUrl && <div className="flex justify-center"><img src={question.imageUrl} className="max-h-72 rounded-lg shadow-md" onError={(e) => e.target.style.display = 'none'} /></div>}
+                                {question.audioUrl && <div className="bg-blue-50 p-4 rounded-xl"><AudioPlayer src={question.audioUrl} /></div>}
+                            </div>
+
+                            {showHint && !isAnswered && (
+                                <div className="mb-6 bg-yellow-50 p-3 rounded-lg text-sm text-yellow-800 border border-yellow-200">
+                                    <strong>Gợi ý:</strong> {hintText}
+                                </div>
+                            )}
+
+                            <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-6">{question.questionText}</h2>
+                            
+                            {question.type === QuestionType.MULTIPLE_CHOICE && (
+                                <div className="grid grid-cols-1 gap-3">
+                                    {question.options?.map((opt, idx) => (
+                                        <button key={idx} onClick={() => handleMCSelect(opt)} disabled={isAnswered} className={`w-full p-4 rounded-xl text-left border-2 transition-all ${isAnswered ? (opt === question.correctAnswer ? 'bg-green-100 border-green-500 text-green-900' : opt === userAnswer ? 'bg-red-100 border-red-500 text-red-900' : 'bg-slate-50 opacity-60') : 'bg-white hover:border-blue-400 hover:shadow-md'}`}>
+                                            <span className="font-bold mr-4 w-6 inline-block">{String.fromCharCode(65 + idx)}</span>{opt}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {question.type === QuestionType.FILL_IN_BLANK && (
+                                <form onSubmit={handleInputSubmit} className="flex flex-col gap-2">
+                                    <div className="flex gap-3">
+                                        <input type="text" value={isAnswered ? userAnswer : inputVal} onChange={(e) => setInputVal(e.target.value)} disabled={isAnswered} className={`flex-1 p-4 rounded-xl border-2 text-lg outline-none ${isAnswered ? (isCorrect() ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50') : 'border-slate-200 focus:border-blue-500'}`} placeholder="Nhập đáp án..." />
+                                        {!isAnswered && <Button type="submit">Trả lời</Button>}
+                                    </div>
+                                    {!isAnswered && <div className="text-xs text-slate-400 text-right">Đã nhập: {inputVal.length} ký tự</div>}
+                                </form>
+                            )}
+
+                            {question.type === QuestionType.REARRANGE && (
+                                <div className="space-y-6">
+                                    <div className="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl border shadow-inner min-h-[60px]">
+                                        {question.rearrangeParts?.map((part, idx) => (
+                                            <button key={idx} onClick={() => handlePartClick(part)} disabled={isAnswered || selectedParts.includes(part)} className={`px-4 py-2 rounded-lg bg-white border shadow-sm transition-all active:scale-95 ${selectedParts.includes(part) ? 'opacity-0 pointer-events-none' : 'hover:border-blue-400'}`}>{part}</button>
+                                        ))}
+                                    </div>
+                                    <div className={`min-h-[80px] p-4 rounded-xl border-2 border-dashed flex flex-wrap gap-2 items-center ${isAnswered ? (isCorrect() ? 'border-green-500 bg-green-50/50' : 'border-red-500 bg-red-50/50') : 'border-slate-300 bg-white'}`}>
+                                         {selectedParts.length === 0 && !isAnswered && <div className="w-full text-center text-slate-400 italic">Bấm từ để sắp xếp...</div>}
+                                        {selectedParts.map((part, idx) => <button key={idx} onClick={() => handlePartClick(part)} disabled={isAnswered} className="bg-blue-100 text-blue-900 px-3 py-1.5 rounded-lg border border-blue-200 font-medium shadow-sm hover:bg-red-100 hover:text-red-800 transition-colors">{part}</button>)}
+                                    </div>
+                                    {!isAnswered && <div className="flex justify-end"><Button onClick={handleRearrangeSubmit} disabled={selectedParts.length === 0}>Xác nhận</Button></div>}
+                                </div>
+                            )}
+
+                            {isAnswered && (
+                                <div className={`mt-8 p-6 rounded-xl border-l-4 shadow-sm animate-fade-in ${isCorrect() ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
+                                    <div className="flex items-start gap-4">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white font-bold ${isCorrect() ? 'bg-green-500' : 'bg-red-500'}`}>{isCorrect() ? '✓' : '✕'}</div>
+                                        <div>
+                                            <h3 className={`font-bold text-xl mb-2 ${isCorrect() ? 'text-green-800' : 'text-red-800'}`}>{isCorrect() ? 'Chính xác!' : 'Chưa chính xác'}</h3>
+                                            {!isCorrect() && <div className="mb-2"><span className="text-red-600 font-bold text-sm uppercase">Đáp án đúng:</span> <span className="font-bold text-slate-800">{question.correctAnswer}</span></div>}
+                                            <div className="bg-white/60 p-3 rounded-lg text-slate-700 text-sm"><span className="font-bold text-blue-600 block mb-1">Giải thích:</span>{question.explanation}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const QuestionGrid = ({ questions, userAnswers, currentIndex, onJump, onClose }) => {
+            const getStatusColor = (q, idx) => {
+                const ans = userAnswers.find(a => a.questionId === q.id);
+                if (idx === currentIndex) return "ring-2 ring-blue-500 border-blue-500 text-blue-600 bg-white";
+                if (!ans) return "bg-slate-100 text-slate-400 border-transparent";
+                return ans.isCorrect ? "bg-green-500 text-white border-green-600" : "bg-red-500 text-white border-red-600";
+            };
+            return (
+                <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-up">
+                        <div className="p-6 border-b flex justify-between items-center bg-slate-50">
+                            <div><h2 className="text-xl font-bold">Danh sách câu hỏi</h2><p className="text-sm text-slate-500">Đã làm: {userAnswers.length} / {questions.length}</p></div>
+                            <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full">✕</button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar"><div className="grid grid-cols-5 sm:grid-cols-10 gap-3">{questions.map((q, idx) => (<button key={q.id} onClick={() => { onJump(idx); onClose(); }} className={`h-10 w-10 rounded-lg font-bold border transition-all ${getStatusColor(q, idx)}`}>{idx + 1}</button>))}</div></div>
+                        <div className="p-4 bg-slate-50 border-t text-xs text-slate-500 flex gap-4 justify-center flex-wrap"><div className="flex items-center gap-2"><span className="w-3 h-3 bg-green-500 rounded-full"></span> Đúng</div><div className="flex items-center gap-2"><span className="w-3 h-3 bg-red-500 rounded-full"></span> Sai</div><div className="flex items-center gap-2"><span className="w-3 h-3 ring-2 ring-blue-500 rounded-full"></span> Đang làm</div><div className="flex items-center gap-2"><span className="w-3 h-3 bg-slate-200 rounded-full"></span> Chưa làm</div></div>
+                    </div>
+                </div>
+            );
+        }
+
+        const ResultScreen = ({ userName, userAnswers, onRetryAll, onRetryWrong }) => {
+            const correct = userAnswers.filter(a => a.isCorrect).length;
+            const total = userAnswers.length;
+            const percent = total > 0 ? Math.round((correct/total)*100) : 0;
+            const hasWrong = correct < total;
+            const score = correct * 10;
+
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 animate-fade-in bg-slate-50">
+                    <div className="bg-white rounded-3xl shadow-xl p-8 max-w-2xl w-full text-center">
+                        <div className="mb-6 relative inline-block">
+                            <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" strokeWidth="12" />
+                                <circle cx="60" cy="60" r="54" fill="none" stroke={percent >= 80 ? '#10b981' : percent >= 50 ? '#3b82f6' : '#ef4444'} strokeWidth="12" strokeDasharray="339.292" strokeDashoffset={339.292 - (339.292 * percent) / 100} className="transition-all duration-1000 ease-out" />
+                            </svg>
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl font-bold text-slate-800">{percent}%</div>
+                        </div>
+                        <h2 className="text-2xl font-bold text-slate-800 mb-2">Hoàn thành bài thi!</h2>
+                        <p className="text-slate-600 mb-4">Chúc mừng <b>{userName}</b></p>
+                        
+                        <div className="mb-8 inline-flex items-baseline gap-2 bg-blue-50 px-6 py-2 rounded-2xl border border-blue-100">
+                             <span className="text-4xl font-extrabold text-blue-600">{score}</span>
+                     <span className="text-lg text-slate-500 font-bold">điểm</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-8 bg-slate-50 p-4 rounded-xl">
+                            <div><div className="text-2xl font-bold text-green-600">{correct}</div><div className="text-xs uppercase text-slate-500 font-bold">Đúng</div></div>
+                            <div className="border-l border-slate-200"><div className="text-2xl font-bold text-red-500">{total - correct}</div><div className="text-xs uppercase text-slate-500 font-bold">Sai</div></div>
+                        </div>
+                        {hasWrong && (
+                            <div className="text-left mb-6 max-h-48 overflow-y-auto custom-scrollbar border-t border-b py-4">
+                                <h3 className="text-xs font-bold text-slate-400 uppercase mb-2">Cần xem lại</h3>
+                                <div className="space-y-2">
+                                    {userAnswers.filter(a => !a.isCorrect).map((ans, i) => {
+                                        const q = QUIZ_DATA.find(x => x.id === ans.questionId);
+                                        return q ? <div key={i} className="text-sm p-2 bg-red-50 rounded"><span className="font-bold text-red-500 mr-2">#{q.id}</span> {q.questionText} <br/><span className="text-xs text-slate-500">Đáp án: {q.correctAnswer}</span></div> : null;
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                        <div className="flex gap-4 justify-center">
+                            <Button onClick={onRetryAll}>Chơi lại từ đầu</Button>
+                            {hasWrong && <Button onClick={onRetryWrong} variant="danger">Làm lại câu sai</Button>}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [gameState, setGameState] = useState(GameState.START);
+            const [userName, setUserName] = useState('');
+            const [activeQuestions, setActiveQuestions] = useState([]);
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [userAnswers, setUserAnswers] = useState([]);
+            const [showGrid, setShowGrid] = useState(false);
+
+            const handleStart = (name) => { setUserName(name); startSession(QUIZ_DATA); };
+            const startSession = (questions) => { setActiveQuestions(questions); setCurrentIndex(0); setUserAnswers([]); setGameState(GameState.PLAYING); };
+            
+            const handleAnswer = (response) => {
+                const q = activeQuestions[currentIndex];
+                const normalize = (s) => s.replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+                const isCorrect = normalize(response) === normalize(q.correctAnswer);
+                setUserAnswers(prev => [...prev.filter(a => a.questionId !== q.id), { questionId: q.id, userResponse: response, isCorrect }]);
+            };
+
+            const handleNext = () => currentIndex < activeQuestions.length - 1 && setCurrentIndex(prev => prev + 1);
+            const handlePrev = () => currentIndex > 0 && setCurrentIndex(prev => prev - 1);
+            const handleSkip = () => handleNext();
+            const handleFinish = () => setGameState(GameState.FINISHED);
+            
+            const handleRetryWrong = () => {
+                const wrongIds = userAnswers.filter(a => !a.isCorrect).map(a => a.questionId);
+                startSession(QUIZ_DATA.filter(q => wrongIds.includes(q.id)));
+            };
+
+            if (gameState === GameState.START) return <StartScreen onStart={handleStart} />;
+            if (gameState === GameState.FINISHED) return <ResultScreen userName={userName} userAnswers={userAnswers} onRetryAll={() => startSession(QUIZ_DATA)} onRetryWrong={handleRetryWrong} />;
+
+            const currentQ = activeQuestions[currentIndex];
+            const answer = userAnswers.find(a => a.questionId === currentQ.id);
+            const isAnswered = !!answer;
+            const isLast = currentIndex === activeQuestions.length - 1;
+            const allAnswered = userAnswers.length === activeQuestions.length;
+            
+            // Calculate Score: 10 points per correct answer
+            const currentScore = userAnswers.filter(a => a.isCorrect).length * 10;
+
+            return (
+                <div className="min-h-screen bg-slate-100 flex flex-col items-center py-8 px-4 pb-32 relative">
+                    <div className="w-full max-w-3xl flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
+                        <div className="flex flex-col"><span className="text-xs font-bold text-slate-400 uppercase">Người chơi</span><span className="font-bold text-slate-700">{userName}</span></div>
+                        
+                        <div className="flex flex-col items-center px-4 border-l border-r border-slate-100">
+                            <span className="text-xs font-bold text-slate-400 uppercase">Điểm số</span>
+                            <span className="font-bold text-emerald-600 text-xl">{currentScore}</span>
+                        </div>
+
+                        <button onClick={() => setShowGrid(true)} className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-bold text-slate-600">Danh sách</button>
+                        
+                        <div className="flex flex-col items-end"><span className="text-xs font-bold text-slate-400 uppercase">Tiến độ</span><span className="font-bold text-blue-600 text-xl">{currentIndex + 1} <span className="text-slate-400 text-sm">/ {activeQuestions.length}</span></span></div>
+                    </div>
+                    <div className="w-full max-w-3xl bg-slate-200 rounded-full h-2 mb-8 overflow-hidden"><div className="bg-blue-600 h-full transition-all duration-300 ease-out" style={{ width: `${(userAnswers.length / activeQuestions.length) * 100}%` }}></div></div>
+                    
+                    <QuestionCard question={currentQ} onAnswer={handleAnswer} isAnswered={isAnswered} userAnswer={answer?.userResponse} />
+                    
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-10">
+                        <div className="w-full max-w-3xl mx-auto flex justify-between items-center gap-4">
+                            <Button onClick={handlePrev} variant="outline" disabled={currentIndex === 0} className="w-24">← Trước</Button>
+                            <div className="flex-1 flex justify-center gap-3">
+                                {isAnswered ? (
+                                    <>
+                                        {!isLast && <Button onClick={handleNext} size="md" className="shadow-xl shadow-blue-500/20 animate-bounce-short">Câu tiếp theo →</Button>}
+                                        <Button onClick={handleFinish} variant={allAnswered ? "secondary" : "danger"}>Nộp bài</Button>
+                                    </>
+                                ) : <Button onClick={handleSkip} variant="outline" className="text-slate-400 hover:text-slate-600">Bỏ qua</Button>}
+                            </div>
+                            <Button onClick={handleNext} variant="outline" disabled={isLast} className={`w-24 ${isAnswered ? 'opacity-0 pointer-events-none hidden sm:flex' : ''}`}>Sau →</Button>
+                        </div>
+                    </div>
+                    {showGrid && <QuestionGrid questions={activeQuestions} userAnswers={userAnswers} currentIndex={currentIndex} onJump={setCurrentIndex} onClose={() => setShowGrid(false)} />}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
